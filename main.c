@@ -148,8 +148,56 @@ void remove_elementos(ABB *t, int item)
     }
 }
 
+void salvaLista(int lista[], int tamLista){
+    FILE *arq;
+    int i;
+    arq = fopen("listaNumeros.txt","w");
+    if(!arq){
+        printf("Não foi possivel salvar os dados da agenda.\n");
+        exit(1);
+    }
+    fprintf(arq,"%d\n",tamLista);
+    for(i=0;i<tamLista;i++){
+        fprintf(arq,"%d\n", lista[i]);
+    }
+
+    fclose(arq);
+}
+
+void carregaLista(int lista[], int *tamLista){
+    FILE *arq;
+    int i;
+    arq = fopen("listaNumeros.txt","r");
+    if(!arq){
+        printf("Nao foi possivel carregar informacoes anteriores.\n");
+        *tamLista=0;
+    }
+    else{
+        fscanf(arq,"%d",tamLista);
+        
+        for(i=0;i<*tamLista;i++){
+            fscanf(arq,"%d", &lista[i]);
+
+        }
+        
+    }
+}
+
 int main(int argc, const char * argv[]) {
+    int tamLista;
+    int lista[500];
+
+    //salvaLista(lista, tamLista);
+    carregaLista(lista, &tamLista);
     
+
+    for(int i=0; i<tamLista; i++){
+        printf("%d - ", lista[i]);
+    }
+
+    
+
+    /*
     ABB *t = malloc (sizeof(ABB));
     t->root = NULL;
     
@@ -176,6 +224,6 @@ int main(int argc, const char * argv[]) {
     remove_elementos(t,29);
     printf("\n\n**********ARVORE RESULTANTE - Remocao 29 *********\n\n");
     imprime_arvore(t->root, 1);
-    
+    */
    return 0;
 }
