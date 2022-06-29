@@ -1,51 +1,70 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-//no
+//Nó
 typedef struct no no;
 struct no{
-    int dado;
-    no * esq;
-    no * dir;
+    int valor;
+    struct no * esq;
+    struct no * dir;
 };
 
-//tree
+//Árvore
 typedef struct
 {
     no * root;
 }ABB;
 
-//------------------------------------------- Insere na Arvore --------------------------------------
+//INSERÇÃO
+//balanceia a inserção na árvore
+void balancoInsercao (int lista[], int tamLista, ABB *avr, int *tamArvore){
+    int meio = tamLista/2; 
+    int i = meio, j = meio+1;
+        while (i>=0 || j<tamLista) {
+        if (i>=0) {
+            insere(avr,lista[i], tamArvore); 
+            printf("%d Inserido \n", lista[i]);
+            i--;
+        }
+        if (j<tamLista) {
+            insere(avr,lista[j], tamArvore); 
+            printf("%d Inserido \n", lista[j]);
+            j++;
+        }
+    }
+}
 
-void insere(ABB *t,int item)
+//Insere na árvore
+void insere(ABB *avr,int item, int *tamArvore)
 {
+    *tamArvore=*tamArvore+1;
     no *novo, *aux, *pos=NULL;
     novo = malloc(sizeof(no));
-    novo->dado = item;
+    novo->valor = item;
     novo->esq = NULL;
     novo->dir = NULL;
     
-    if(t->root==NULL)
+    if(avr->root==NULL)
     {
-        t->root = novo;
+        avr->root = novo;
     }
     else
     {
-        aux = t->root;
+        aux = avr->root;
         while (aux!= NULL)
         {
            pos = aux;
-           if(item <aux->dado)aux = aux->esq;
-           else if(item > aux->dado) aux = aux->dir;
+           if(item < aux->valor)aux = aux->esq;
+           else if(item >= aux->valor) aux = aux->dir;
         }
-        if(pos->dado > item) pos->esq = novo;
+        if(pos->valor > item) pos->esq = novo;
         else pos->dir = novo;
     }
 }
 
-//------------------------------------ Imprime a arvore identada -----------------------------------------
+//Impressão da árvore
 
-void imprime_dado(int c, int b) {
+void imprime_valor(int c, int b) {
     int i;
     for (i = 0; i < b; i++) printf("-");
     printf("%d\n", c);
@@ -56,25 +75,25 @@ void imprime_arvore(no *x, int b) {
         return;
     }
     imprime_arvore(x->esq, b+1);
-    imprime_dado(x->dado, b);
+    imprime_valor(x->valor, b);
     imprime_arvore(x->dir, b+1);
 }
 
-//-------------------------------------- Remove elementos da arvore ---------------------------------
+//Remoção da árvore
 
 no* busca_pos(ABB *t, int item, no **pai)
 {
     no * aux;
     aux = t->root;
-    while(aux != NULL && aux->dado != item)
+    while(aux != NULL && aux->valor != item)
     {
-        if(item < aux->dado)
+        if(item < aux->valor)
         {
             *pai = aux;
             aux = aux->esq;
             
         }
-        else if(item > aux->dado)
+        else if(item > aux->valor)
         {
             *pai = aux;
             aux = aux->dir;
@@ -96,7 +115,7 @@ int  busca_folha(no *pai)
     }
     if(pai->dir == NULL && pai->esq == NULL)
     {
-        val = pai->dado;
+        val = pai->valor;
         //printf("\nValor da Folha: %d", val);
         ant->dir = NULL;
         
@@ -107,7 +126,7 @@ int  busca_folha(no *pai)
 void remove_elementos(ABB *t, int item)
 {
     no * aux, * pai, * pos = busca_pos(t, item, &pai);
-    //printf("\n\nPos->dado :%d || pai->dado:%d", pos->dado,pai->dado);
+    //printf("\n\nPos->valor :%d || pai->valor:%d", pos->valor,pai->valor);
     if(pos == NULL)
         printf ("Elemento não encontrado");
     else
@@ -119,7 +138,7 @@ void remove_elementos(ABB *t, int item)
            // elemento folha
            if(pos->esq == NULL && pos->dir== NULL)
            {
-               if(pai->esq->dado==item) pai->esq = NULL;
+               if(pai->esq->valor==item) pai->esq = NULL;
                else pai->dir = NULL;
            }
            else // elemento tem dois filhos
@@ -129,7 +148,7 @@ void remove_elementos(ABB *t, int item)
                    // busca folha para troca
                    int val = busca_folha(pos->esq);
                    //troca os valores dos filho mais a direita do filho esquerdo;
-                   pos->dado = val;
+                   pos->valor = val;
                }
                else // elemento um dos dois filhos.
                {
@@ -138,7 +157,7 @@ void remove_elementos(ABB *t, int item)
                        if(pos->dir != NULL) aux = pos->dir;
                        else aux = pos->esq;
                        
-                       if(pai->esq->dado==item) pai->esq = aux;
+                       if(pai->esq->valor==item) pai->esq = aux;
                        else pai->dir = aux;
                    }
                }
@@ -151,9 +170,9 @@ void remove_elementos(ABB *t, int item)
 void salvaLista(int lista[], int tamLista){
     FILE *arq;
     int i;
-    arq = fopen("listaNumeros.txt","w");
+    arq = fopen("SaidaNumeros.txt","w");
     if(!arq){
-        printf("Não foi possivel salvar os dados da agenda.\n");
+        printf("Não foi possivel salvar os valors da agenda.\n");
         exit(1);
     }
     fprintf(arq,"%d\n",tamLista);
@@ -167,7 +186,7 @@ void salvaLista(int lista[], int tamLista){
 void carregaLista(int lista[], int *tamLista){
     FILE *arq;
     int i;
-    arq = fopen("listaNumeros.txt","r");
+    arq = fopen("EntradaNumeros.txt","r");
     if(!arq){
         printf("Nao foi possivel carregar informacoes anteriores.\n");
         *tamLista=0;
@@ -186,35 +205,27 @@ void carregaLista(int lista[], int *tamLista){
 int main(int argc, const char * argv[]) {
     int tamLista;
     int lista[500];
+    
+ 
 
-    //salvaLista(lista, tamLista);
     carregaLista(lista, &tamLista);
-    
 
-    for(int i=0; i<tamLista; i++){
-        printf("%d - ", lista[i]);
-    }
+    ABB *avr = malloc (sizeof(ABB));
+    avr->root = NULL;
+    int i = 0;
+    int *tamArvore = &i;
 
-    
+    balancoInsercao(lista, tamLista, avr, tamArvore);
 
-    /*
-    ABB *t = malloc (sizeof(ABB));
-    t->root = NULL;
-    
-    //monta arvore.
-    insere(t,10);
-    insere(t,4);
-    insere(t,2);
-    insere(t,3);
-    insere(t,20);
-    insere(t,17);
-    insere(t,29);
-    insere(t,6);
-    insere(t,9);
-    
-    printf("\n\n**********ARVORE MONTADA*********\n\n");
-    imprime_arvore(t->root, 1);
-    
+    //imprime_arvore(avr->root, 1);
+
+    insere(avr, 5, tamArvore); 
+    insere(avr, 3, tamArvore); 
+
+    imprime_arvore(avr->root, 1);
+
+/*
+
     remove_elementos(t, 4);
     printf("\n\n**********ARVORE RESULTANTE - Remocao 4 *********\n\n");
     imprime_arvore(t->root, 1);
@@ -225,5 +236,7 @@ int main(int argc, const char * argv[]) {
     printf("\n\n**********ARVORE RESULTANTE - Remocao 29 *********\n\n");
     imprime_arvore(t->root, 1);
     */
+
+   salvaLista(lista, tamLista);
    return 0;
 }
