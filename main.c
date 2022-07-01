@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+//CRIAÇÃO DA ÁRVORE
+
 //Nó
 typedef struct no no;
 struct no{
@@ -15,8 +17,8 @@ typedef struct
     no * root;
 }ABB;
 
-//INSERÇÃO
-//balanceia a inserção na árvore
+//balanceia a árvore
+/*
 void balanco(int lista[], int tamLista, ABB *avr){
     int meio = tamLista/2; 
     int i = meio, j = meio+1;
@@ -31,6 +33,17 @@ void balanco(int lista[], int tamLista, ABB *avr){
         }
     }
 }
+*/
+
+void balanco(int lista[], ABB *avr, int inicio, int fim){
+    int meio = (inicio+fim)/2; 
+    if (fim<inicio) return;
+    insere(avr,lista[meio]);
+    balanco(lista, avr, inicio, meio-1);
+    balanco(lista, avr, meio+1, fim);
+}
+
+//INSERÇÃO
 
 //Insere na árvore
 void insere(ABB *avr,int item)
@@ -59,22 +72,7 @@ void insere(ABB *avr,int item)
     }
 }
 
-//Impressão da árvore
 
-void imprime_valor(int c, int b) {
-    int i;
-    for (i = 0; i < b; i++) printf("-");
-    printf("%d\n", c);
-}
-
-void imprime_arvore(no *x, int b) {
-    if (x == NULL) {
-        return;
-    }
-    imprime_arvore(x->esq, b+1);
-    imprime_valor(x->valor, b);
-    imprime_arvore(x->dir, b+1);
-}
 
 //Remoção da árvore
 no* busca_pos(ABB *avr, int item, no **pai)
@@ -119,15 +117,15 @@ int  busca_folha(no *pai, no **rai)
     return val;
 }
 
-void remove_elemento(ABB *avr, int item)
+void remove_elemento(ABB *avr, int item, FILE *arq)
 {
     no * aux, * pai, * pos = busca_pos(avr, item, &pai);
     //printf("\n\nPos->valor :%d || pai->valor:%d", pos->valor,pai->valor);
     if(pos == NULL)
-        printf ("\n\n Elemento não encontrado para remoção");
+        fprintf (arq, "\nElemento não encontrado para remoção");
     else {
         if(pos == avr->root) {
-            printf ("\n\nVOCÊ ESTÁ REMOVENDO A RAIZ -> APAGANDO A ARVORE");
+            fprintf (arq, "\nVOCÊ ESTÁ REMOVENDO A RAIZ -> APAGANDO A ARVORE");
             avr->root = NULL;
         }
         else
@@ -164,13 +162,44 @@ void remove_elemento(ABB *avr, int item)
     }
 }
 
+//REBALANCEANDO A ARVORE
+void coleta_valor(int c, int *b, int *listaRebal[]) {
+    listaRebal[*b] = c;
+    (*b)++;
+}
 
-//Carregando e Salvando a árvore
+void coleta_arvore(no *x, int *b, int *listaRebal[]) {
+    if (x == NULL) {
+        return;
+    }
+    coleta_arvore(x->esq, b, listaRebal);
+    coleta_valor(x->valor, b, listaRebal);
+    coleta_arvore(x->dir, b, listaRebal);
+}
 
+
+//CARREGANDO E SALVANDO INFORMAÇÕES EM ARQUVOS EXTERNOS
+//Impressão da árvore
+
+void imprime_valor(int c, int b, FILE *arq) {
+    int i;
+    for (i = 0; i < b; i++) fprintf(arq, "-");
+    fprintf(arq, "(%d)\n", c);
+}
+
+void imprime_arvore(no *x, int b, FILE *arq) {
+    if (x == NULL) {
+        return;
+    }
+    imprime_arvore(x->esq, b+1, arq);
+    imprime_valor(x->valor, b, arq);
+    imprime_arvore(x->dir, b+1, arq);
+}
+//Impressão dos números em ordem
 void salva_valor(int c, int b, FILE *arq) {
     int i;
     for (i = 0; i < b; i++);
-     fprintf(arq,"%d \n", c);
+     fprintf(arq,"%d - ", c);
 }
 
 void salva_arvore(no *x, int b, FILE *arq) {
@@ -181,20 +210,7 @@ void salva_arvore(no *x, int b, FILE *arq) {
     salva_valor(x->valor, b, arq);
     salva_arvore(x->dir, b+1, arq);
 }
-
-void salvaLista(ABB *avr){
-    FILE *arq;
-    int i;
-    arq = fopen("SaidaNumeros.txt","w");
-    if(!arq){
-        printf("Não foi possivel salvar a árvore.\n");
-        exit(1);
-    }
-    fprintf(arq, "Resultado da árvore em-ordem \n");
-    salva_arvore(avr->root, 1, arq);
-    fclose(arq);
-}
-
+//carregando as informaçaões
 void carregaLista(int lista[], int *tamLista){
     FILE *arq;
     int i;
@@ -223,37 +239,47 @@ int main(int argc, const char * argv[]) {
     ABB *avr = malloc (sizeof(ABB));
     avr->root = NULL;
 
+    FILE *arq;
+    arq = fopen("SaidaNumeros.txt","w");
+
     //Balanceia, cria e imprime a arvore inicial
-    balanco(lista, tamLista, avr);
-    printf("\n\n - Árvore criada: -\n\n");
-    imprime_arvore(avr->root, 1);
+    balanco(lista, avr, 0, tamLista-1);
+    fprintf(arq, "- Árvore criada: -\n");
+    imprime_arvore(avr->root, 1, arq);
 
     //Inserindo na Árvore binária
-    insere(avr, 85); 
-    insere(avr, 35);
-    insere(avr, 33);
-    insere(avr, 37);
-    printf("\n\n - Resultado Inserção do 85, 35, 33 e 37 -\n\n");
-    imprime_arvore(avr->root, 1);
+    insere(avr, 88);  
+    fprintf(arq, "\n\n - Resultado Inserção do 88 -\n");
+    imprime_arvore(avr->root, 1, arq);
 
     //Buscando na Árvore Binária
-    printf ("\nBuscando o numero 10 na Arvore Binaria: \n");
+    fprintf (arq, "\n- Buscando o numero 10 na Arvore Binaria -\n");
     no * pai;
     no * pos = busca_pos(avr, 10, &pai);
-    if(pos == NULL) printf ("Elemento não encontrado");
-    else if (pos->valor == avr->root->valor) printf("Encontrado: Pos->valor :%d É a raiz ", pos->valor);
-    else printf("Encontrado - valor :%d || pai:%d", pos->valor,pai->valor);
+    if(pos == NULL) fprintf (arq, "Elemento não encontrado");
+    else if (pos->valor == avr->root->valor) fprintf(arq, "Encontrado: Pos->valor :%d É a raiz ", pos->valor);
+    else fprintf(arq, "Encontrado -> valor :%d || pai:%d", pos->valor,pai->valor);
 
     //Removendo da Árvore Binária
-    remove_elemento(avr, 35);
-    remove_elemento(avr, 90);
-    printf("\n\n - Resultado Remocao do 35 e do 90-\n\n");
-    imprime_arvore(avr->root, 1);
+    remove_elemento(avr, 40, arq);
+    remove_elemento(avr, 20, arq);
+    fprintf(arq, "\n\n - Resultado Remocao do 40 e do 20-\n");
+    imprime_arvore(avr->root, 1, arq);
 
     //Rebalanceando a árvore
-
+    int listaRebal[500];
+    int b=0;
+    int *numRebal = &b;
+    coleta_arvore(avr->root, numRebal, listaRebal);
+    avr->root = NULL;
+    balanco(listaRebal, avr, 0, b-1);
+    fprintf(arq, "\n\n- Árvore Rebalanceada: -\n");
+    imprime_arvore(avr->root, 1, arq);
 
     //Salvando a Árvore binária em-ordem
-    salvaLista(avr);
+    fprintf(arq, "\n\nPercurso Em-ordem da ABB rebalanceada\n");
+    salva_arvore(avr->root, 1, arq);
+    fclose(arq);
+
    return 0;
 }
