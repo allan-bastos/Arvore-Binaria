@@ -1,3 +1,10 @@
+// ANDRÉ LISBOA AUGUSTO - PC3016196
+// ALLAN BASTOS DA SILVA - PC3016145
+// EDSON RODRIGUES DA CRUZ FILHO - PC3017184
+
+// IMPORTANTE!! 
+// O arquivo de saida sera criado após a execução do programa
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -17,24 +24,7 @@ typedef struct
     no * root;
 }ABB;
 
-//balanceia a árvore
-/*
-void balanco(int lista[], int tamLista, ABB *avr){
-    int meio = tamLista/2; 
-    int i = meio, j = meio+1;
-        while (i>=0 || j<tamLista) {
-        if (i>=0) {
-            insere(avr,lista[i]); 
-            i--;
-        }
-        if (j<tamLista) {
-            insere(avr,lista[j]); 
-            j++;
-        }
-    }
-}
-*/
-
+//BALANCEAMENTO DA ARVORE
 void balanco(int lista[], ABB *avr, int inicio, int fim){
     int meio = (inicio+fim)/2; 
     if (fim<inicio) return;
@@ -43,9 +33,7 @@ void balanco(int lista[], ABB *avr, int inicio, int fim){
     balanco(lista, avr, meio+1, fim);
 }
 
-//INSERÇÃO
-
-//Insere na árvore
+//INSERÇÃO NA ARVORE
 void insere(ABB *avr,int item)
 {
     no *novo, *aux, *pos=NULL;
@@ -74,7 +62,7 @@ void insere(ABB *avr,int item)
 
 
 
-//Remoção da árvore
+//BUSCA NA ÁRVORE
 no* busca_pos(ABB *avr, int item, no **pai)
 {
     no * aux;
@@ -117,6 +105,7 @@ int  busca_folha(no *pai, no **rai)
     return val;
 }
 
+//REMOÇÃO NA ÁRVORE
 void remove_elemento(ABB *avr, int item, FILE *arq)
 {
     no * aux, * pai, * pos = busca_pos(avr, item, &pai);
@@ -195,7 +184,7 @@ void imprime_arvore(no *x, int b, FILE *arq) {
     imprime_valor(x->valor, b, arq);
     imprime_arvore(x->dir, b+1, arq);
 }
-//Impressão dos números em ordem
+//Impressão dos números em-ordem
 void salva_valor(int c, int b, FILE *arq) {
     int i;
     for (i = 0; i < b; i++);
@@ -210,6 +199,7 @@ void salva_arvore(no *x, int b, FILE *arq) {
     salva_valor(x->valor, b, arq);
     salva_arvore(x->dir, b+1, arq);
 }
+
 //carregando as informaçaões
 void carregaLista(int lista[], int *tamLista){
     FILE *arq;
