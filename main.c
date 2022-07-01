@@ -17,25 +17,24 @@ typedef struct
 
 //INSERÇÃO
 //balanceia a inserção na árvore
-void balanco(int lista[], int tamLista, ABB *avr, int *tamArvore){
+void balanco(int lista[], int tamLista, ABB *avr){
     int meio = tamLista/2; 
     int i = meio, j = meio+1;
         while (i>=0 || j<tamLista) {
         if (i>=0) {
-            insere(avr,lista[i], tamArvore); 
+            insere(avr,lista[i]); 
             i--;
         }
         if (j<tamLista) {
-            insere(avr,lista[j], tamArvore); 
+            insere(avr,lista[j]); 
             j++;
         }
     }
 }
 
 //Insere na árvore
-void insere(ABB *avr,int item, int *tamArvore)
+void insere(ABB *avr,int item)
 {
-    *tamArvore=*tamArvore+1;
     no *novo, *aux, *pos=NULL;
     novo = malloc(sizeof(no));
     novo->valor = item;
@@ -120,7 +119,7 @@ int  busca_folha(no *pai, no **rai)
     return val;
 }
 
-void remove_elemento(ABB *avr, int item, int *tamArvore)
+void remove_elemento(ABB *avr, int item)
 {
     no * aux, * pai, * pos = busca_pos(avr, item, &pai);
     //printf("\n\nPos->valor :%d || pai->valor:%d", pos->valor,pai->valor);
@@ -129,12 +128,10 @@ void remove_elemento(ABB *avr, int item, int *tamArvore)
     else {
         if(pos == avr->root) {
             printf ("\n\nVOCÊ ESTÁ REMOVENDO A RAIZ -> APAGANDO A ARVORE");
-            *tamArvore=0;
             avr->root = NULL;
         }
         else
         {
-            *tamArvore=*tamArvore-1;
            // elemento folha
            if(pos->esq == NULL && pos->dir== NULL)
            {
@@ -170,22 +167,22 @@ void remove_elemento(ABB *avr, int item, int *tamArvore)
 
 //Carregando e Salvando a árvore
 
-void salva_valor(int c, int b) {
+void salva_valor(int c, int b, FILE *arq) {
     int i;
-    for (i = 0; i < b; i++) printf("-");
-    printf("%d\n", c);
+    for (i = 0; i < b; i++);
+     fprintf(arq,"%d \n", c);
 }
 
-void salva_arvore(no *x, int b) {
+void salva_arvore(no *x, int b, FILE *arq) {
     if (x == NULL) {
         return;
     }
-    imprime_arvore(x->esq, b+1);
-    imprime_valor(x->valor, b);
-    imprime_arvore(x->dir, b+1);
+    salva_arvore(x->esq, b+1, arq);
+    salva_valor(x->valor, b, arq);
+    salva_arvore(x->dir, b+1, arq);
 }
 
-void salvaLista(ABB *aux){
+void salvaLista(ABB *avr){
     FILE *arq;
     int i;
     arq = fopen("SaidaNumeros.txt","w");
@@ -193,7 +190,8 @@ void salvaLista(ABB *aux){
         printf("Não foi possivel salvar a árvore.\n");
         exit(1);
     }
-    salva_arvore(aux->root, 1);
+    fprintf(arq, "Resultado da árvore em-ordem \n");
+    salva_arvore(avr->root, 1, arq);
     fclose(arq);
 }
 
@@ -219,24 +217,23 @@ void carregaLista(int lista[], int *tamLista){
 int main(int argc, const char * argv[]) {
     int tamLista;
     int lista[500];
-    int i = 0;
 
     carregaLista(lista, &tamLista);
 
     ABB *avr = malloc (sizeof(ABB));
     avr->root = NULL;
-    
-    int *tamArvore = &i;
 
     //Balanceia, cria e imprime a arvore inicial
-    balanco(lista, tamLista, avr, tamArvore);
+    balanco(lista, tamLista, avr);
     printf("\n\n - Árvore criada: -\n\n");
     imprime_arvore(avr->root, 1);
 
     //Inserindo na Árvore binária
-    insere(avr, 85, tamArvore); 
-    insere(avr, 35, tamArvore);
-    printf("\n\n - Resultado Remocao do 85 e do 35-\n\n");
+    insere(avr, 85); 
+    insere(avr, 35);
+    insere(avr, 33);
+    insere(avr, 37);
+    printf("\n\n - Resultado Inserção do 85, 35, 33 e 37 -\n\n");
     imprime_arvore(avr->root, 1);
 
     //Buscando na Árvore Binária
@@ -248,8 +245,8 @@ int main(int argc, const char * argv[]) {
     else printf("Encontrado - valor :%d || pai:%d", pos->valor,pai->valor);
 
     //Removendo da Árvore Binária
-    remove_elemento(avr, 35, tamArvore);
-    remove_elemento(avr, 90, tamArvore);
+    remove_elemento(avr, 35);
+    remove_elemento(avr, 90);
     printf("\n\n - Resultado Remocao do 35 e do 90-\n\n");
     imprime_arvore(avr->root, 1);
 
@@ -257,7 +254,6 @@ int main(int argc, const char * argv[]) {
 
 
     //Salvando a Árvore binária em-ordem
-    printf("\n\n - %d -\n\n", *tamArvore);
     salvaLista(avr);
    return 0;
 }
